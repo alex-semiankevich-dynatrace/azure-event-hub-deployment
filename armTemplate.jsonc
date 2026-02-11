@@ -1,0 +1,307 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.4.1.14562",
+      "templateHash": "1234567890"
+    }
+  },
+  "parameters": {
+    "locations": {
+      "type": "array",
+      "metadata": {
+        "description": "List of Azure locations where Event Hub namespaces will be deployed"
+      }
+    },
+    "dtTenantId": {
+      "type": "string",
+      "metadata": {
+        "description": "Dynatrace tenant ID for resource naming"
+      }
+    },
+    "dtConfigId": {
+      "type": "string",
+      "metadata": {
+        "description": "Monitoring configuration ID for tagging and autodiscovery"
+      }
+    },
+    "environment": {
+      "type": "string",
+      "defaultValue": "prod",
+      "allowedValues": [
+        "prod",
+        "dev",
+        "test"
+      ],
+      "metadata": {
+        "description": "Environment: prod, dev or test"
+      }
+    },
+    "dtMonitoringServicePrincipalId": {
+      "type": "string",
+      "metadata": {
+        "description": "Service principal object ID for RBAC assignment."
+      }
+    },
+    "evhLogsPartitionCount": {
+      "type": "int",
+      "defaultValue": 4,
+      "minValue": 1,
+      "maxValue": 32,
+      "metadata": {
+        "description": "Number of partitions for dt-logs-evh Event Hub"
+      }
+    },
+    "evhEventsPartitionCount": {
+      "type": "int",
+      "defaultValue": 1,
+      "allowedValues": [
+        1,
+        2
+      ],
+      "metadata": {
+        "description": "Number of partitions for dt-events-evh Event Hub (1 or 2)"
+      }
+    },
+    "skuName": {
+      "type": "string",
+      "defaultValue": "Standard",
+      "allowedValues": [
+        "Basic",
+        "Standard",
+        "Premium"
+      ],
+      "metadata": {
+        "description": "Event Hub namespace SKU"
+      }
+    },
+    "skuCapacity": {
+      "type": "int",
+      "defaultValue": 1,
+      "minValue": 1,
+      "maxValue": 20,
+      "metadata": {
+        "description": "Minimum throughput units (baseline)"
+      }
+    },
+    "maximumThroughputUnits": {
+      "type": "int",
+      "defaultValue": 10,
+      "minValue": 1,
+      "maxValue": 40,
+      "metadata": {
+        "description": "Maximum throughput units for auto-inflate"
+      }
+    },
+    "evhLogsRetentionInDays": {
+      "type": "int",
+      "defaultValue": 1,
+      "minValue": 1,
+      "maxValue": 7,
+      "metadata": {
+        "description": "Message retention period in days for dt-logs-evh"
+      }
+    },
+    "evhEventsRetentionInDays": {
+      "type": "int",
+      "defaultValue": 1,
+      "minValue": 1,
+      "maxValue": 7,
+      "metadata": {
+        "description": "Message retention period in days for dt-events-evh"
+      }
+    },
+    "zoneRedundant": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable zone redundancy (Standard or Premium SKU required)"
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {},
+      "metadata": {
+        "description": "Additional custom tags"
+      }
+    }
+  },
+  "variables": {
+    // "Azure Event Hubs Data Receiver" role
+    // Role Description: https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/analytics#azure-event-hubs-data-receiver
+    "dataReceiverRoleId": "a638d3c7-ab3a-418d-83e6-5f17a39d4fde"
+  },
+  "resources": [
+    {
+      "copy": {
+        "name": "resourceGroups",
+        "count": "[length(parameters('locations'))]"
+      },
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2021-04-01",
+      "name": "[format('rg-dt-{0}-{1}', parameters('dtTenantId'), parameters('locations')[copyIndex()])]",
+      "location": "[parameters('locations')[copyIndex()]]",
+      "tags": "[if(contains(parameters('tags'), 'Microsoft.Resources/resourceGroups'), union(parameters('tags')['Microsoft.Resources/resourceGroups'], createObject('environment', parameters('environment'), 'managed-by', 'dynatrace')), union(parameters('tags'), createObject('environment', parameters('environment'), 'managed-by', 'dynatrace')))]"
+    },
+    {
+      "copy": {
+        "name": "namespaceDeployments",
+        "count": "[length(parameters('locations'))]"
+      },
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "name": "[format('deploy-evhns-{0}', parameters('locations')[copyIndex()])]",
+      "resourceGroup": "[format('rg-dt-{0}-{1}', parameters('dtTenantId'), parameters('locations')[copyIndex()])]",
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', format('rg-dt-{0}-{1}', parameters('dtTenantId'), parameters('locations')[copyIndex()]))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "dtTenantId": {"type": "string"},
+            "location": {"type": "string"},
+            "dtConfigId": {"type": "string"},
+            "environment": {"type": "string"},
+            "skuName": {"type": "string"},
+            "skuCapacity": {"type": "int"},
+            "maximumThroughputUnits": {"type": "int"},
+            "zoneRedundant": {"type": "bool"},
+            "evhLogsPartitionCount": {"type": "int"},
+            "evhEventsPartitionCount": {"type": "int"},
+            "evhLogsRetentionInDays": {"type": "int"},
+            "evhEventsRetentionInDays": {"type": "int"},
+            "tags": {"type": "object"}
+          },
+          "resources": [
+            {
+              "type": "Microsoft.EventHub/namespaces",
+              "apiVersion": "2021-11-01",
+              "name": "[format('evhns-dt-{0}-{1}', parameters('dtTenantId'), parameters('location'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "[parameters('skuName')]",
+                "tier": "[parameters('skuName')]",
+                "capacity": "[parameters('skuCapacity')]"
+              },
+              "properties": {
+                "isAutoInflateEnabled": true,
+                "maximumThroughputUnits": "[parameters('maximumThroughputUnits')]",
+                "zoneRedundant": "[parameters('zoneRedundant')]"
+              },
+              "tags": "[if(contains(parameters('tags'), 'Microsoft.EventHub/namespaces'), union(parameters('tags')['Microsoft.EventHub/namespaces'], createObject('dt-log-ingest-activated', parameters('dtConfigId'), 'environment', parameters('environment'), 'managed-by', 'dynatrace')), union(parameters('tags'), createObject('dt-log-ingest-activated', parameters('dtConfigId'), 'environment', parameters('environment'), 'managed-by', 'dynatrace')))]"
+            },
+            {
+              "type": "Microsoft.EventHub/namespaces/eventhubs",
+              "apiVersion": "2021-11-01",
+              "name": "[format('evhns-dt-{0}-{1}/dt-logs-evh', parameters('dtTenantId'), parameters('location'))]",
+              "dependsOn": [
+                "[resourceId('Microsoft.EventHub/namespaces', format('evhns-dt-{0}-{1}', parameters('dtTenantId'), parameters('location')))]"
+              ],
+              "properties": {
+                "messageRetentionInDays": "[parameters('evhLogsRetentionInDays')]",
+                "partitionCount": "[parameters('evhLogsPartitionCount')]"
+              }
+              // Note: Tags cannot be applied to Event Hubs.
+            },
+            {
+              "type": "Microsoft.EventHub/namespaces/eventhubs",
+              "apiVersion": "2021-11-01",
+              "name": "[format('evhns-dt-{0}-{1}/dt-events-evh', parameters('dtTenantId'), parameters('location'))]",
+              "dependsOn": [
+                "[resourceId('Microsoft.EventHub/namespaces', format('evhns-dt-{0}-{1}', parameters('dtTenantId'), parameters('location')))]"
+              ],
+              "properties": {
+                "messageRetentionInDays": "[parameters('evhEventsRetentionInDays')]",
+                "partitionCount": "[parameters('evhEventsPartitionCount')]"
+              }
+              // Note: Tags cannot be applied to Event Hubs.
+            }
+          ]
+        },
+        "parameters": {
+          "dtTenantId": {"value": "[parameters('dtTenantId')]"},
+          "location": {"value": "[parameters('locations')[copyIndex()]]"},
+          "dtConfigId": {"value": "[parameters('dtConfigId')]"},
+          "environment": {"value": "[parameters('environment')]"},
+          "skuName": {"value": "[parameters('skuName')]"},
+          "skuCapacity": {"value": "[parameters('skuCapacity')]"},
+          "maximumThroughputUnits": {"value": "[parameters('maximumThroughputUnits')]"},
+          "zoneRedundant": {"value": "[parameters('zoneRedundant')]"},
+          "evhLogsPartitionCount": {"value": "[parameters('evhLogsPartitionCount')]"},
+          "evhEventsPartitionCount": {"value": "[parameters('evhEventsPartitionCount')]"},
+          "evhLogsRetentionInDays": {"value": "[parameters('evhLogsRetentionInDays')]"},
+          "evhEventsRetentionInDays": {"value": "[parameters('evhEventsRetentionInDays')]"},
+          "tags": {"value": "[parameters('tags')]"}
+        }
+      }
+    },
+    {
+      "copy": {
+        "name": "rbacAssignments",
+        "count": "[length(parameters('locations'))]"
+      },
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "name": "[format('deploy-rbac-{0}', parameters('locations')[copyIndex()])]",
+      "resourceGroup": "[format('rg-dt-{0}-{1}', parameters('dtTenantId'), parameters('locations')[copyIndex()])]",
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', format('rg-dt-{0}-{1}', parameters('dtTenantId'), parameters('locations')[copyIndex()]))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-dt-{0}-{1}', parameters('dtTenantId'), parameters('locations')[copyIndex()])), 'Microsoft.Resources/deployments', format('deploy-evhns-{0}', parameters('locations')[copyIndex()]))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "dtTenantId": {"type": "string"},
+            "location": {"type": "string"},
+            "dtMonitoringServicePrincipalId": {"type": "string"},
+            "dataReceiverRoleId": {"type": "string"}
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "name": "[guid(format('rg-dt-{0}-{1}', parameters('dtTenantId'), parameters('location')), parameters('dtMonitoringServicePrincipalId'), parameters('dataReceiverRoleId'))]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', parameters('dataReceiverRoleId'))]",
+                "principalId": "[parameters('dtMonitoringServicePrincipalId')]",
+                "principalType": "ServicePrincipal"
+              }
+            }
+          ]
+        },
+        "parameters": {
+          "dtTenantId": {"value": "[parameters('dtTenantId')]"},
+          "location": {"value": "[parameters('locations')[copyIndex()]]"},
+          "dtMonitoringServicePrincipalId": {"value": "[parameters('dtMonitoringServicePrincipalId')]"},
+          "dataReceiverRoleId": {"value": "[variables('dataReceiverRoleId')]"}
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "deployedNamespaces": {
+      "type": "array",
+      "copy": {
+        "count": "[length(parameters('locations'))]",
+        "input": "[format('evhns-dt-{0}-{1}', parameters('dtTenantId'), parameters('locations')[copyIndex()])]"
+      },
+      "metadata": {
+        "description": "Array of deployed Event Hub namespace names"
+      }
+    }
+  }
+}
