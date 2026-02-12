@@ -17,32 +17,13 @@
           "visible": false
         },
         "location": {
-          "visible": false
+          "visible": true,
+          "label": "Location",
+          "toolTip": "Location for storing deployment metadata only. This is not used for Event Hub deployment. Select deployment regions in the next step."
         }
       }
     },
-    "basics": [
-      {
-        "name": "locationsApi",
-        "type": "Microsoft.Solutions.ArmApiControl",
-        "request": {
-          "method": "GET",
-          "path": "[concat(subscription().id, '/locations?api-version=2022-12-01')]"
-        }
-      },
-      {
-        "name": "locations",
-        "type": "Microsoft.Common.DropDown",
-        "label": "Regions",
-        "toolTip": "Select one or more regions to deploy Event Hub Namespaces.",
-        "multiselect": true,
-        "constraints": {
-          "allowedValues": "[map(basics('locationsApi').value, (item) => parse(concat('{\"label\":\"', item.displayName, '\",\"value\":\"', item.name, '\"}')))]",
-          "required": true
-        },
-        "visible": true
-      }
-    ],
+    "basics": [],
     "steps": [
       {
         "name": "dynatraceConfig",
@@ -135,7 +116,26 @@
               "text": "Configure the Event Hub namespace SKU, capacity, and auto-inflate settings. Auto-inflate automatically scales throughput units based on load."
             }
           },
-
+          {
+            "name": "locationsApi",
+            "type": "Microsoft.Solutions.ArmApiControl",
+            "request": {
+              "method": "GET",
+              "path": "[concat(subscription().id, '/locations?api-version=2022-12-01')]"
+            }
+          },
+          {
+            "name": "locations",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Regions",
+            "toolTip": "Select one or more regions to deploy Event Hub Namespaces.",
+            "multiselect": true,
+            "constraints": {
+              "allowedValues": "[map(steps('eventHubNamespaceConfig').locationsApi.value, (item) => parse(concat('{\"label\":\"', item.displayName, '\",\"value\":\"', item.name, '\"}')))]",
+              "required": true
+            },
+            "visible": true
+          },
           {
             "name": "skuName",
             "type": "Microsoft.Common.DropDown",
@@ -312,8 +312,7 @@
       }
     ],
     "outputs": {
-      "location": "[first(basics('locations'))]",
-      "locations": "[basics('locations')]",
+      "locations": "[steps('eventHubNamespaceConfig').locations]",
       "dtTenantId": "[steps('dynatraceConfig').dtTenantId]",
       "dtConfigId": "[steps('dynatraceConfig').dtConfigId]",
       "environment": "[steps('dynatraceConfig').environment]",
