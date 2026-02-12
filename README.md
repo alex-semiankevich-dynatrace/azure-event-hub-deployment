@@ -1,3 +1,5 @@
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Falex-semiankevich-dynatrace%2Fazure-event-hub-deployment%2Fmaster%2FarmTemplate.jsonc/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Falex-semiankevich-dynatrace%2Fazure-event-hub-deployment%2Fmaster%2FcreateUiDefinition.json)
+
 # Create ARM template and UI Definition for Event Hub deployment
 
 ## Description
