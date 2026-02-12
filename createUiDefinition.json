@@ -186,7 +186,7 @@
             "constraints": {
               "required": true
             },
-            "visible": true
+            "visible": "[equals(steps('eventHubNamespaceConfig').skuName, 'Standard')]"
           },
           {
             "name": "zoneRedundant",

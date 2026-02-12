@@ -133,9 +133,7 @@
     // Role Description: https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/analytics#azure-event-hubs-data-receiver
     "dataReceiverRoleId": "a638d3c7-ab3a-418d-83e6-5f17a39d4fde",
     // Auto-inflate is only supported for Standard SKU
-    "isAutoInflateEnabled": "[equals(parameters('skuName'), 'Standard')]",
-    // Maximum throughput units only applicable when auto-inflate is enabled
-    "maximumThroughputUnits": "[if(equals(parameters('skuName'), 'Standard'), parameters('maximumThroughputUnits'), null())]"
+    "isAutoInflateEnabled": "[equals(parameters('skuName'), 'Standard')]"
   },
   "resources": [
     {
@@ -177,7 +175,7 @@
             "skuName": {"type": "string"},
             "skuCapacity": {"type": "int"},
             "isAutoInflateEnabled": {"type": "bool"},
-            "maximumThroughputUnits": {},
+            "maximumThroughputUnits": {"type": "int"},
             "zoneRedundant": {"type": "bool"},
             "evhLogsPartitionCount": {"type": "int"},
             "evhEventsPartitionCount": {"type": "int"},
@@ -198,7 +196,7 @@
               },
               "properties": {
                 "isAutoInflateEnabled": "[parameters('isAutoInflateEnabled')]",
-                "maximumThroughputUnits": "[parameters('maximumThroughputUnits')]",
+                "maximumThroughputUnits": "[if(parameters('isAutoInflateEnabled'), parameters('maximumThroughputUnits'), null())]",
                 "zoneRedundant": "[parameters('zoneRedundant')]"
               },
               "tags": "[if(contains(parameters('tags'), 'Microsoft.EventHub/namespaces'), union(parameters('tags')['Microsoft.EventHub/namespaces'], createObject('dt-log-ingest-activated', parameters('dtConfigId'), 'environment', parameters('environment'), 'managed-by', 'dynatrace')), union(parameters('tags'), createObject('dt-log-ingest-activated', parameters('dtConfigId'), 'environment', parameters('environment'), 'managed-by', 'dynatrace')))]"
@@ -239,7 +237,7 @@
           "skuName": {"value": "[parameters('skuName')]"},
           "skuCapacity": {"value": "[parameters('skuCapacity')]"},
           "isAutoInflateEnabled": {"value": "[variables('isAutoInflateEnabled')]"},
-          "maximumThroughputUnits": {"value": "[variables('maximumThroughputUnits')]"},
+          "maximumThroughputUnits": {"value": "[parameters('maximumThroughputUnits')]"},
           "zoneRedundant": {"value": "[parameters('zoneRedundant')]"},
           "evhLogsPartitionCount": {"value": "[parameters('evhLogsPartitionCount')]"},
           "evhEventsPartitionCount": {"value": "[parameters('evhEventsPartitionCount')]"},
