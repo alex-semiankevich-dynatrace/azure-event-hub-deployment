@@ -131,7 +131,11 @@
   "variables": {
     // "Azure Event Hubs Data Receiver" role
     // Role Description: https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/analytics#azure-event-hubs-data-receiver
-    "dataReceiverRoleId": "a638d3c7-ab3a-418d-83e6-5f17a39d4fde"
+    "dataReceiverRoleId": "a638d3c7-ab3a-418d-83e6-5f17a39d4fde",
+    // Auto-inflate is only supported for Standard SKU
+    "isAutoInflateEnabled": "[equals(parameters('skuName'), 'Standard')]",
+    // Maximum throughput units only applicable when auto-inflate is enabled
+    "maximumThroughputUnits": "[if(equals(parameters('skuName'), 'Standard'), parameters('maximumThroughputUnits'), null())]"
   },
   "resources": [
     {
@@ -172,7 +176,8 @@
             "environment": {"type": "string"},
             "skuName": {"type": "string"},
             "skuCapacity": {"type": "int"},
-            "maximumThroughputUnits": {"type": "int"},
+            "isAutoInflateEnabled": {"type": "bool"},
+            "maximumThroughputUnits": {},
             "zoneRedundant": {"type": "bool"},
             "evhLogsPartitionCount": {"type": "int"},
             "evhEventsPartitionCount": {"type": "int"},
@@ -192,7 +197,7 @@
                 "capacity": "[parameters('skuCapacity')]"
               },
               "properties": {
-                "isAutoInflateEnabled": "[not(equals(parameters('skuName'), 'Basic'))]", // Auto Inflate can only be enabled on Standard namespaces.
+                "isAutoInflateEnabled": "[parameters('isAutoInflateEnabled')]",
                 "maximumThroughputUnits": "[parameters('maximumThroughputUnits')]",
                 "zoneRedundant": "[parameters('zoneRedundant')]"
               },
@@ -233,7 +238,8 @@
           "environment": {"value": "[parameters('environment')]"},
           "skuName": {"value": "[parameters('skuName')]"},
           "skuCapacity": {"value": "[parameters('skuCapacity')]"},
-          "maximumThroughputUnits": {"value": "[parameters('maximumThroughputUnits')]"},
+          "isAutoInflateEnabled": {"value": "[variables('isAutoInflateEnabled')]"},
+          "maximumThroughputUnits": {"value": "[variables('maximumThroughputUnits')]"},
           "zoneRedundant": {"value": "[parameters('zoneRedundant')]"},
           "evhLogsPartitionCount": {"value": "[parameters('evhLogsPartitionCount')]"},
           "evhEventsPartitionCount": {"value": "[parameters('evhEventsPartitionCount')]"},
