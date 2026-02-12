@@ -312,6 +312,7 @@
       }
     ],
     "outputs": {
+      "location": "[first(basics('locations'))]",
       "locations": "[basics('locations')]",
       "dtTenantId": "[steps('dynatraceConfig').dtTenantId]",
       "dtConfigId": "[steps('dynatraceConfig').dtConfigId]",
