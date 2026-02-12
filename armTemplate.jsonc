@@ -192,7 +192,7 @@
                 "capacity": "[parameters('skuCapacity')]"
               },
               "properties": {
-                "isAutoInflateEnabled": true,
+                "isAutoInflateEnabled": "[not(equals(parameters('skuName'), 'Basic'))]", // Auto Inflate can only be enabled on Standard namespaces.
                 "maximumThroughputUnits": "[parameters('maximumThroughputUnits')]",
                 "zoneRedundant": "[parameters('zoneRedundant')]"
               },
