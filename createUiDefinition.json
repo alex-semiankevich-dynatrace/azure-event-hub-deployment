@@ -326,12 +326,6 @@
       "evhEventsPartitionCount": "[int(steps('eventHubConfig').eventsEventHubSection.evhEventsPartitionCount)]",
       "evhEventsRetentionInDays": "[steps('eventHubConfig').eventsEventHubSection.evhEventsRetentionInDays]",
       "tags": "[steps('tags').customTags]"
-    },
-    "resourceTypes": [
-      "Microsoft.Resources/resourceGroups",
-      "Microsoft.EventHub/namespaces",
-      "Microsoft.EventHub/namespaces/eventhubs",
-      "Microsoft.Authorization/roleAssignments"
-    ]
+    }
   }
 }
