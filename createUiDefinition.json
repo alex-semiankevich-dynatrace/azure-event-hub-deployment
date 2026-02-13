@@ -19,7 +19,7 @@
         "location": {
           "visible": true,
           "label": "Location",
-          "toolTip": "Location for storing deployment metadata only. This is not used for Event Hub deployment. Select deployment regions in the next step."
+          "toolTip": "Location for storing deployment metadata only. This is not used for Event Hub deployment. Select deployment locations in the next step."
         }
       }
     },
@@ -127,8 +127,8 @@
           {
             "name": "locations",
             "type": "Microsoft.Common.DropDown",
-            "label": "Regions",
-            "toolTip": "Select one or more regions to deploy Event Hub Namespaces.",
+            "label": "Locations",
+            "toolTip": "Select one or more locations to deploy Event Hub Namespaces.",
             "multiselect": true,
             "filter": true,
             "constraints": {
