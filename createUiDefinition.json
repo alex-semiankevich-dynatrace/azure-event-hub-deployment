@@ -130,6 +130,7 @@
             "label": "Regions",
             "toolTip": "Select one or more regions to deploy Event Hub Namespaces.",
             "multiselect": true,
+            "filter": true,
             "constraints": {
               "allowedValues": "[map(steps('eventHubNamespaceConfig').locationsApi.value, (item) => parse(concat('{\"label\":\"', item.displayName, '\",\"value\":\"', item.name, '\"}')))]",
               "required": true
