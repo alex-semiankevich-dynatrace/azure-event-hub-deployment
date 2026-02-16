@@ -35,14 +35,14 @@
             "visible": true,
             "options": {
               "icon": "Info",
-              "text": "Provide your Dynatrace tenant and monitoring configuration details. Select the service principal used for Dynatrace monitoring"
+              "text": "Provide your Dynatrace environment and monitoring configuration details. Select the service principal used for Dynatrace monitoring"
             }
           },
           {
             "name": "dtTenantId",
             "type": "Microsoft.Common.TextBox",
-            "label": "Dynatrace Tenant ID",
-            "toolTip": "Your Dynatrace tenant identifier (e.g. abc12345)",
+            "label": "Dynatrace Environment ID",
+            "toolTip": "Your Dynatrace environment identifier (e.g. abc1234d)",
             "constraints": {
               "required": true
             }
