@@ -59,30 +59,6 @@
             }
           },
           {
-            "name": "environment",
-            "type": "Microsoft.Common.DropDown",
-            "label": "Environment",
-            "toolTip": "Target environment for deployment",
-            "defaultValue": "Production",
-            "constraints": {
-              "required": true,
-              "allowedValues": [
-                {
-                  "label": "Production",
-                  "value": "prod"
-                },
-                {
-                  "label": "Development",
-                  "value": "dev"
-                },
-                {
-                  "label": "Test",
-                  "value": "test"
-                }
-              ]
-            }
-          },
-          {
             "name": "ServicePrincipal",
             "type": "Microsoft.Common.ServicePrincipalSelector",
             "label": {
@@ -104,8 +80,8 @@
         ]
       },
       {
-        "name": "eventHubNamespaceConfig",
-        "label": "Event Hub Namespace Configuration",
+        "name": "eventHubConfig",
+        "label": "Event Hubs Configuration",
         "elements": [
           {
             "name": "namespaceInfo",
@@ -117,107 +93,100 @@
             }
           },
           {
-            "name": "locationsApi",
-            "type": "Microsoft.Solutions.ArmApiControl",
-            "request": {
-              "method": "GET",
-              "path": "[concat(subscription().id, '/locations?api-version=2022-12-01')]"
-            }
-          },
-          {
-            "name": "locations",
-            "type": "Microsoft.Common.DropDown",
-            "label": "Locations",
-            "toolTip": "Select one or more locations to deploy Event Hub Namespaces.",
-            "multiselect": true,
-            "filter": true,
-            "constraints": {
-              "allowedValues": "[map(steps('eventHubNamespaceConfig').locationsApi.value, (item) => parse(concat('{\"label\":\"', item.displayName, '\",\"value\":\"', item.name, '\"}')))]",
-              "required": true
-            },
-            "visible": true
-          },
-          {
-            "name": "skuName",
-            "type": "Microsoft.Common.DropDown",
-            "label": "SKU",
-            "toolTip": "Event Hub namespace pricing tier",
-            "defaultValue": "Standard",
-            "constraints": {
-              "required": true,
-              "allowedValues": [
-                {
-                  "label": "Basic",
-                  "value": "Basic"
-                },
-                {
-                  "label": "Standard",
-                  "value": "Standard"
-                },
-                {
-                  "label": "Premium",
-                  "value": "Premium"
+                "name": "locationsApi",
+                "type": "Microsoft.Solutions.ArmApiControl",
+                "request": {
+                  "method": "GET",
+                  "path": "[concat(subscription().id, '/locations?api-version=2022-12-01')]"
                 }
-              ]
-            }
+              },
+          {
+            "name": "eventHubNamespace",
+            "type": "Microsoft.Common.Section",
+            "label": "Event Hub Namespace Configuration",
+            "elements": [
+              {
+                "name": "locations",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Locations",
+                "toolTip": "Select one or more locations to deploy Event Hub Namespaces.",
+                "multiselect": true,
+                "filter": true,
+                "constraints": {
+                  "allowedValues": "[map(steps('eventHubConfig').locationsApi.value, (item) => parse(concat('{\"label\":\"', item.displayName, '\",\"value\":\"', item.name, '\"}')))]",
+                  "required": true
+                },
+                "visible": true
+              },
+              {
+                "name": "skuName",
+                "type": "Microsoft.Common.DropDown",
+                "label": "SKU",
+                "toolTip": "Event Hub namespace pricing tier",
+                "defaultValue": "Standard",
+                "constraints": {
+                  "required": true,
+                  "allowedValues": [
+                    {
+                      "label": "Basic",
+                      "value": "Basic"
+                    },
+                    {
+                      "label": "Standard",
+                      "value": "Standard"
+                    },
+                    {
+                      "label": "Premium",
+                      "value": "Premium"
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "skuCapacity",
+                "type": "Microsoft.Common.Slider",
+                "label": "Throughput Units (Baseline)",
+                "min": 1,
+                "max": 20,
+                "defaultValue": 1,
+                "showStepMarkers": false,
+                "toolTip": "Minimum/baseline throughput units (1-20). This is the starting capacity before auto-inflate.",
+                "constraints": {
+                  "required": true
+                },
+                "visible": true
+              },
+              {
+                "name": "maximumThroughputUnits",
+                "type": "Microsoft.Common.Slider",
+                "label": "Maximum Throughput Units (Auto-inflate)",
+                "min": "[steps('eventHubConfig').eventHubNamespace.skuCapacity]",
+                "max": 40,
+                "defaultValue": 10,
+                "showStepMarkers": false,
+                "toolTip": "Maximum throughput units for auto-inflate scaling (1-40). Must be greater than or equal to baseline throughput units.",
+                "constraints": {
+                  "required": true
+                },
+                "visible": "[equals(steps('eventHubConfig').eventHubNamespace.skuName, 'Standard')]"
+              },
+              {
+                "name": "zoneRedundant",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Enable Zone Redundancy",
+                "toolTip": "Requires Standard or Premium SKU. Provides high availability across availability zones.",
+                "visible": "[or(equals(steps('eventHubConfig').eventHubNamespace.skuName, 'Standard'), equals(steps('eventHubConfig').eventHubNamespace.skuName, 'Premium'))]"
+              }
+            ]
           },
+
           {
-            "name": "skuCapacity",
-            "type": "Microsoft.Common.Slider",
-            "label": "Throughput Units (Baseline)",
-            "min": 1,
-            "max": 20,
-            "defaultValue": 1,
-            "showStepMarkers": false,
-            "toolTip": "Minimum/baseline throughput units (1-20). This is the starting capacity before auto-inflate.",
-            "constraints": {
-              "required": true
-            },
-            "visible": true
-          },
-          {
-            "name": "maximumThroughputUnits",
-            "type": "Microsoft.Common.Slider",
-            "label": "Maximum Throughput Units (Auto-inflate)",
-            "min": "[steps('eventHubNamespaceConfig').skuCapacity]",
-            "max": 40,
-            "defaultValue": 10,
-            "showStepMarkers": false,
-            "toolTip": "Maximum throughput units for auto-inflate scaling (1-40). Must be greater than or equal to baseline throughput units.",
-            "constraints": {
-              "required": true
-            },
-            "visible": "[equals(steps('eventHubNamespaceConfig').skuName, 'Standard')]"
-          },
-          {
-            "name": "zoneRedundant",
-            "type": "Microsoft.Common.CheckBox",
-            "label": "Enable Zone Redundancy",
-            "toolTip": "Requires Standard or Premium SKU. Provides high availability across availability zones.",
-            "visible": "[or(equals(steps('eventHubNamespaceConfig').skuName, 'Standard'), equals(steps('eventHubNamespaceConfig').skuName, 'Premium'))]"
-          }
-        ]
-      },
-      {
-        "name": "eventHubConfig",
-        "label": "Event Hub Settings",
-        "elements": [
-          {
-            "name": "eventHubInfo",
-            "type": "Microsoft.Common.InfoBox",
-            "visible": true,
-            "options": {
-              "icon": "Info",
-              "text": "Configure partition counts and message retention for the dt-logs-evh and dt-events-evh Event Hubs that will be created in each namespace."
-            }
-          },
-          {
-            "name": "logsEventHubSection",
+            "name": "logsEventHub",
             "type": "Microsoft.Common.Section",
             "label": "Logs Event Hub Configuration",
             "elements": [
               {
-                "name": "evhLogsPartitionCount",
+                "name": "partitionCount",
                 "type": "Microsoft.Common.TextBox",
                 "label": "Partition Count",
                 "defaultValue": "4",
@@ -229,7 +198,7 @@
                 }
               },
               {
-                "name": "evhLogsRetentionInDays",
+                "name": "retentionInDays",
                 "type": "Microsoft.Common.Slider",
                 "label": "Message Retention (days)",
                 "min": 1,
@@ -245,12 +214,12 @@
             "visible": true
           },
           {
-            "name": "eventsEventHubSection",
+            "name": "eventsEventHub",
             "type": "Microsoft.Common.Section",
             "label": "Events Event Hub Configuration",
             "elements": [
               {
-                "name": "evhEventsPartitionCount",
+                "name": "partitionCount",
                 "type": "Microsoft.Common.DropDown",
                 "label": "Partition Count",
                 "toolTip": "Number of partitions (1 or 2)",
@@ -270,7 +239,7 @@
                 }
               },
               {
-                "name": "evhEventsRetentionInDays",
+                "name": "retentionInDays",
                 "type": "Microsoft.Common.Slider",
                 "label": "Message Retention (days)",
                 "min": 1,
@@ -297,7 +266,7 @@
             "visible": true,
             "options": {
               "icon": "Info",
-              "text": "Optional: Add custom tags to all deployed resources. Standard tags (environment, managed-by, dt-log-ingest-activated) are added automatically."
+              "text": "Optional: Add custom tags to all deployed resources. Standard tags (managed-by, dt-log-ingest-activated) are added automatically."
             }
           },
           {
@@ -313,19 +282,18 @@
       }
     ],
     "outputs": {
-      "locations": "[steps('eventHubNamespaceConfig').locations]",
+      "locations": "[steps('eventHubConfig').eventHubNamespace.locations]",
       "dtTenantId": "[steps('dynatraceConfig').dtTenantId]",
       "dtConfigId": "[steps('dynatraceConfig').dtConfigId]",
-      "environment": "[steps('dynatraceConfig').environment]",
       "dtMonitoringServicePrincipalId": "[first(steps('dynatraceConfig').ServicePrincipal.objectId)]",
-      "skuName": "[steps('eventHubNamespaceConfig').skuName]",
-      "skuCapacity": "[steps('eventHubNamespaceConfig').skuCapacity]",
-      "maximumThroughputUnits": "[steps('eventHubNamespaceConfig').maximumThroughputUnits]",
-      "zoneRedundant": "[steps('eventHubNamespaceConfig').zoneRedundant]",
-      "evhLogsPartitionCount": "[int(steps('eventHubConfig').logsEventHubSection.evhLogsPartitionCount)]",
-      "evhLogsRetentionInDays": "[steps('eventHubConfig').logsEventHubSection.evhLogsRetentionInDays]",
-      "evhEventsPartitionCount": "[int(steps('eventHubConfig').eventsEventHubSection.evhEventsPartitionCount)]",
-      "evhEventsRetentionInDays": "[steps('eventHubConfig').eventsEventHubSection.evhEventsRetentionInDays]",
+      "skuName": "[steps('eventHubConfig').eventHubNamespace.skuName]",
+      "skuCapacity": "[steps('eventHubConfig').eventHubNamespace.skuCapacity]",
+      "maximumThroughputUnits": "[steps('eventHubConfig').eventHubNamespace.maximumThroughputUnits]",
+      "zoneRedundant": "[steps('eventHubConfig').eventHubNamespace.zoneRedundant]",
+      "evhLogsPartitionCount": "[int(steps('eventHubConfig').logsEventHub.partitionCount)]",
+      "evhLogsRetentionInDays": "[steps('eventHubConfig').logsEventHub.retentionInDays]",
+      "evhEventsPartitionCount": "[int(steps('eventHubConfig').eventsEventHub.partitionCount)]",
+      "evhEventsRetentionInDays": "[steps('eventHubConfig').eventsEventHub.retentionInDays]",
       "tags": "[steps('tags').customTags]"
     }
   }
