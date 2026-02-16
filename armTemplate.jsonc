@@ -27,42 +27,10 @@
         "description": "Monitoring configuration ID for tagging and autodiscovery"
       }
     },
-    "environment": {
-      "type": "string",
-      "defaultValue": "prod",
-      "allowedValues": [
-        "prod",
-        "dev",
-        "test"
-      ],
-      "metadata": {
-        "description": "Environment: prod, dev or test"
-      }
-    },
     "dtMonitoringServicePrincipalId": {
       "type": "string",
       "metadata": {
         "description": "Service principal object ID for RBAC assignment."
-      }
-    },
-    "evhLogsPartitionCount": {
-      "type": "int",
-      "defaultValue": 4,
-      "minValue": 1,
-      "maxValue": 32,
-      "metadata": {
-        "description": "Number of partitions for dt-logs-evh Event Hub"
-      }
-    },
-    "evhEventsPartitionCount": {
-      "type": "int",
-      "defaultValue": 1,
-      "allowedValues": [
-        1,
-        2
-      ],
-      "metadata": {
-        "description": "Number of partitions for dt-events-evh Event Hub (1 or 2)"
       }
     },
     "skuName": {
@@ -95,6 +63,22 @@
         "description": "Maximum throughput units for auto-inflate"
       }
     },
+    "zoneRedundant": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable zone redundancy (Standard or Premium SKU required)"
+      }
+    },
+    "evhLogsPartitionCount": {
+      "type": "int",
+      "defaultValue": 4,
+      "minValue": 1,
+      "maxValue": 32,
+      "metadata": {
+        "description": "Number of partitions for dt-logs-evh Event Hub (1 - 32)"
+      }
+    },
     "evhLogsRetentionInDays": {
       "type": "int",
       "defaultValue": 1,
@@ -104,6 +88,15 @@
         "description": "Message retention period in days for dt-logs-evh"
       }
     },
+    "evhEventsPartitionCount": {
+      "type": "int",
+      "defaultValue": 1,
+      "minValue": 1,
+      "maxValue": 2,
+      "metadata": {
+        "description": "Number of partitions for dt-events-evh Event Hub (1 or 2)"
+      }
+    },
     "evhEventsRetentionInDays": {
       "type": "int",
       "defaultValue": 1,
@@ -111,13 +104,6 @@
       "maxValue": 7,
       "metadata": {
         "description": "Message retention period in days for dt-events-evh"
-      }
-    },
-    "zoneRedundant": {
-      "type": "bool",
-      "defaultValue": false,
-      "metadata": {
-        "description": "Enable zone redundancy (Standard or Premium SKU required)"
       }
     },
     "tags": {
@@ -145,7 +131,7 @@
       "apiVersion": "2021-04-01",
       "name": "[format('rg-dt-{0}-{1}', parameters('dtTenantId'), parameters('locations')[copyIndex()])]",
       "location": "[parameters('locations')[copyIndex()]]",
-      "tags": "[if(contains(parameters('tags'), 'Microsoft.Resources/resourceGroups'), union(parameters('tags')['Microsoft.Resources/resourceGroups'], createObject('environment', parameters('environment'), 'managed-by', 'dynatrace')), union(parameters('tags'), createObject('environment', parameters('environment'), 'managed-by', 'dynatrace')))]"
+      "tags": "[if(contains(parameters('tags'), 'Microsoft.Resources/resourceGroups'), union(parameters('tags')['Microsoft.Resources/resourceGroups'], createObject('managed-by', 'dynatrace')), union(parameters('tags'), createObject('managed-by', 'dynatrace')))]"
     },
     {
       "copy": {
@@ -171,7 +157,6 @@
             "dtTenantId": {"type": "string"},
             "location": {"type": "string"},
             "dtConfigId": {"type": "string"},
-            "environment": {"type": "string"},
             "skuName": {"type": "string"},
             "skuCapacity": {"type": "int"},
             "isAutoInflateEnabled": {"type": "bool"},
@@ -199,7 +184,7 @@
                 "maximumThroughputUnits": "[if(parameters('isAutoInflateEnabled'), parameters('maximumThroughputUnits'), null())]",
                 "zoneRedundant": "[parameters('zoneRedundant')]"
               },
-              "tags": "[if(contains(parameters('tags'), 'Microsoft.EventHub/namespaces'), union(parameters('tags')['Microsoft.EventHub/namespaces'], createObject('dt-log-ingest-activated', parameters('dtConfigId'), 'environment', parameters('environment'), 'managed-by', 'dynatrace')), union(parameters('tags'), createObject('dt-log-ingest-activated', parameters('dtConfigId'), 'environment', parameters('environment'), 'managed-by', 'dynatrace')))]"
+              "tags": "[if(contains(parameters('tags'), 'Microsoft.EventHub/namespaces'), union(parameters('tags')['Microsoft.EventHub/namespaces'], createObject('dt-log-ingest-activated', parameters('dtConfigId'), 'managed-by', 'dynatrace')), union(parameters('tags'), createObject('dt-log-ingest-activated', parameters('dtConfigId'), 'managed-by', 'dynatrace')))]"
             },
             {
               "type": "Microsoft.EventHub/namespaces/eventhubs",
@@ -233,7 +218,6 @@
           "dtTenantId": {"value": "[parameters('dtTenantId')]"},
           "location": {"value": "[parameters('locations')[copyIndex()]]"},
           "dtConfigId": {"value": "[parameters('dtConfigId')]"},
-          "environment": {"value": "[parameters('environment')]"},
           "skuName": {"value": "[parameters('skuName')]"},
           "skuCapacity": {"value": "[parameters('skuCapacity')]"},
           "isAutoInflateEnabled": {"value": "[variables('isAutoInflateEnabled')]"},
