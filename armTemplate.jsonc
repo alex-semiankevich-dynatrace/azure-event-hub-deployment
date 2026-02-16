@@ -30,7 +30,7 @@
     "dtMonitoringServicePrincipalId": {
       "type": "string",
       "metadata": {
-        "description": "Service principal object ID for RBAC assignment."
+        "description": "Service principal Object ID or Application ID for RBAC assignment."
       }
     },
     "skuName": {
