@@ -277,7 +277,7 @@
       "locations": "[steps('eventHubConfig').eventHubNamespace.locations]",
       "dtTenantId": "[steps('dynatraceConfig').dtTenantId]",
       "dtConfigId": "[steps('dynatraceConfig').dtConfigId]",
-      "dtMonitoringServicePrincipalId": "[first(steps('dynatraceConfig').dtServicePrincipal)]",
+      "dtMonitoringServicePrincipalId": "[steps('dynatraceConfig').dtServicePrincipal]",
       "skuName": "[steps('eventHubConfig').eventHubNamespace.skuName]",
       "skuCapacity": "[steps('eventHubConfig').eventHubNamespace.skuCapacity]",
       "maximumThroughputUnits": "[steps('eventHubConfig').eventHubNamespace.maximumThroughputUnits]",
