@@ -60,13 +60,21 @@
           },
           {
             "name": "dtServicePrincipal",
-            "type": "Microsoft.Common.TextBox",
-            "label": "Service Principal ID",
-            "toolTip": "Azure service principal configured for monitoring in Dynatrace",
+            "type": "Microsoft.Common.ServicePrincipalSelector",
+            "label": {
+              "principalId": "Service Principal ID",
+              "password": "Secret key",
+              "sectionHeader": "Select Dynatrace Service Principal"
+            },
+            "defaultValue": {
+              "principalId": "<default guid>",
+              "name": "(New) default App Id"
+            },
             "constraints": {
-              "required": true,
-              "regex": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$",
-              "validationMessage": "Must be a valid UUID (e.g., 592b6da9-9ce2-4ead-9e24-55bdae3bfaf7)"
+              "required": true
+            },
+            "options": {
+              "hideCertificate": true
             }
           }
         ]
@@ -277,7 +285,7 @@
       "locations": "[steps('eventHubConfig').eventHubNamespace.locations]",
       "dtTenantId": "[steps('dynatraceConfig').dtTenantId]",
       "dtConfigId": "[steps('dynatraceConfig').dtConfigId]",
-      "dtMonitoringServicePrincipalId": "[steps('dynatraceConfig').dtServicePrincipal]",
+      "dtMonitoringServicePrincipalId": "[first(steps('dynatraceConfig').dtServicePrincipal.objectId)]",
       "skuName": "[steps('eventHubConfig').eventHubNamespace.skuName]",
       "skuCapacity": "[steps('eventHubConfig').eventHubNamespace.skuCapacity]",
       "maximumThroughputUnits": "[steps('eventHubConfig').eventHubNamespace.maximumThroughputUnits]",
