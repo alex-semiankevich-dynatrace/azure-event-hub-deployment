@@ -98,7 +98,7 @@
             "visible": true,
             "options": {
               "icon": "Info",
-              "text": "Please, select the Azure locations where Event Hub namespaces will be deployed and choose a configuration size that matches your workload requirements."
+              "text": "Please, select the Azure locations where Event Hub namespaces should be deployed and choose a configuration size that matches your workload requirements."
             }
           },
           {
@@ -119,7 +119,7 @@
             "type": "Microsoft.Common.DropDown",
             "label": "Configuration Size",
             "toolTip": "Select a preset configuration or choose Custom for manual configuration",
-            "defaultValue": "Medium",
+            "defaultValue": "Small (Standard, 1 TU, auto-inflate to 2, 2/1 partitions)",
             "constraints": {
               "required": true,
               "allowedValues": [
@@ -128,15 +128,15 @@
                   "value": "DevTest"
                 },
                 {
-                  "label": "Small (Basic, 1 TU, 2/1 partitions)",
+                  "label": "Small (Standard, 1 TU, auto-inflate to 2, 2/1 partitions)",
                   "value": "Small"
                 },
                 {
-                  "label": "Medium (Standard, 5 TU, auto-inflate to 10, 4/1 partitions)",
+                  "label": "Medium (Standard, 1 TU, auto-inflate to 4, 4/1 partitions)",
                   "value": "Medium"
                 },
                 {
-                  "label": "Large (Standard, 10 TU, auto-inflate to 20, 8/2 partitions)",
+                  "label": "Large (Standard, 1 TU, auto-inflate to 16, 16/2 partitions)",
                   "value": "Large"
                 },
                 {
@@ -311,12 +311,12 @@
       "dtTenantId": "[steps('dynatraceConfig').dtTenantId]",
       "dtConfigId": "[steps('dynatraceConfig').dtConfigId]",
       "dtMonitoringServicePrincipalId": "[first(steps('dynatraceConfig').dtServicePrincipal.objectId)]",
-      "skuName": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventHubNamespace.skuName, if(or(equals(steps('eventHubConfig').configurationSize, 'DevTest'), equals(steps('eventHubConfig').configurationSize, 'Small')), 'Basic', 'Standard'))]",
+      "skuName": "[coalesce(first(map(filter(parse('[{\"config\":\"DevTest\",\"sku\":\"Basic\"},{\"config\":\"Small\",\"sku\":\"Standard\"},{\"config\":\"Medium\",\"sku\":\"Standard\"},{\"config\":\"Large\",\"sku\":\"Standard\"}]'), (item) => equals(item.config, steps('eventHubConfig').configurationSize)), (item) => item.sku)), steps('eventHubConfig').eventHubNamespace.skuName)]",
       "skuCapacity": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventHubNamespace.skuCapacity, 1)]",
-      "maximumThroughputUnits": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventHubNamespace.maximumThroughputUnits, if(equals(steps('eventHubConfig').configurationSize, 'DevTest'), 1, if(equals(steps('eventHubConfig').configurationSize, 'Medium'), 10, 20)))]",
-      "evhLogsPartitionCount": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), int(steps('eventHubConfig').logsEventHub.partitionCount), if(equals(steps('eventHubConfig').configurationSize, 'DevTest'), 1, if(equals(steps('eventHubConfig').configurationSize, 'Small'), 2, if(equals(steps('eventHubConfig').configurationSize, 'Medium'), 4, 8))))]",
+      "maximumThroughputUnits": "[coalesce(first(map(filter(parse('[{\"config\":\"DevTest\",\"maxTU\":1},{\"config\":\"Small\",\"maxTU\":2},{\"config\":\"Medium\",\"maxTU\":4},{\"config\":\"Large\",\"maxTU\":16}]'), (item) => equals(item.config, steps('eventHubConfig').configurationSize)), (item) => item.maxTU)), steps('eventHubConfig').eventHubNamespace.maximumThroughputUnits)]",
+      "evhLogsPartitionCount": "[coalesce(first(map(filter(parse('[{\"config\":\"DevTest\",\"partitions\":1},{\"config\":\"Small\",\"partitions\":2},{\"config\":\"Medium\",\"partitions\":4},{\"config\":\"Large\",\"partitions\":16}]'), (item) => equals(item.config, steps('eventHubConfig').configurationSize)), (item) => item.partitions)), int(steps('eventHubConfig').logsEventHub.partitionCount))]",
       "evhLogsRetentionInDays": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').logsEventHub.retentionInDays, 1)]",
-      "evhEventsPartitionCount": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), int(steps('eventHubConfig').eventsEventHub.partitionCount), if(equals(steps('eventHubConfig').configurationSize, 'Large'), 2, 1))]",
+      "evhEventsPartitionCount": "[coalesce(first(map(filter(parse('[{\"config\":\"DevTest\",\"partitions\":1},{\"config\":\"Small\",\"partitions\":1},{\"config\":\"Medium\",\"partitions\":1},{\"config\":\"Large\",\"partitions\":2}]'), (item) => equals(item.config, steps('eventHubConfig').configurationSize)), (item) => item.partitions)), int(steps('eventHubConfig').eventsEventHub.partitionCount))]",
       "evhEventsRetentionInDays": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventsEventHub.retentionInDays, 1)]",
       "tags": "[steps('tags').customTags]"
     }
