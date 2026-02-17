@@ -200,7 +200,8 @@
                 "toolTip": "Maximum throughput units for auto-inflate scaling (1-40). Must be greater than or equal to baseline throughput units.",
                 "constraints": {
                   "required": true
-                }
+                },
+                "visible": "[equals(steps('eventHubConfig').eventHubNamespace.skuName, 'Standard')]"
               }
             ]
           },
