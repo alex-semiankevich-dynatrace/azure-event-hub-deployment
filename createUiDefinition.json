@@ -93,6 +93,15 @@
         "label": "Event Hubs Configuration",
         "elements": [
           {
+            "name": "eventHubInfo",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": true,
+            "options": {
+              "icon": "Info",
+              "text": "Please, select the Azure locations where Event Hub namespaces will be deployed and choose a configuration size that matches your workload requirements."
+            }
+          },
+          {
             "name": "locations",
             "type": "Microsoft.Common.DropDown",
             "label": "Locations",
@@ -304,7 +313,7 @@
       "dtMonitoringServicePrincipalId": "[first(steps('dynatraceConfig').dtServicePrincipal.objectId)]",
       "skuName": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventHubNamespace.skuName, if(or(equals(steps('eventHubConfig').configurationSize, 'DevTest'), equals(steps('eventHubConfig').configurationSize, 'Small')), 'Basic', 'Standard'))]",
       "skuCapacity": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventHubNamespace.skuCapacity, if(or(equals(steps('eventHubConfig').configurationSize, 'DevTest'), equals(steps('eventHubConfig').configurationSize, 'Small')), 1, if(equals(steps('eventHubConfig').configurationSize, 'Medium'), 5, 10)))]",
-      "maximumThroughputUnits": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventHubNamespace.maximumThroughputUnits, if(equals(steps('eventHubConfig').configurationSize, 'Medium'), 10, 20))]",
+      "maximumThroughputUnits": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventHubNamespace.maximumThroughputUnits, if(equals(steps('eventHubConfig').configurationSize, 'DevTest'), 1, if(equals(steps('eventHubConfig').configurationSize, 'Medium'), 10, 20)))]",
       "evhLogsPartitionCount": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), int(steps('eventHubConfig').logsEventHub.partitionCount), if(equals(steps('eventHubConfig').configurationSize, 'DevTest'), 1, if(equals(steps('eventHubConfig').configurationSize, 'Small'), 2, if(equals(steps('eventHubConfig').configurationSize, 'Medium'), 4, 8))))]",
       "evhLogsRetentionInDays": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').logsEventHub.retentionInDays, 1)]",
       "evhEventsPartitionCount": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), int(steps('eventHubConfig').eventsEventHub.partitionCount), if(equals(steps('eventHubConfig').configurationSize, 'Large'), 2, 1))]",
