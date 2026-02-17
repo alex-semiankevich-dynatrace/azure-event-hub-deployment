@@ -23,7 +23,16 @@
         }
       }
     },
-    "basics": [],
+    "basics": [
+      {
+        "name": "locationsApi",
+        "type": "Microsoft.Solutions.ArmApiControl",
+        "request": {
+          "method": "GET",
+          "path": "[concat(subscription().id, '/locations?api-version=2022-12-01')]"
+        }
+      }
+    ],
     "steps": [
       {
         "name": "dynatraceConfig",
@@ -84,40 +93,52 @@
         "label": "Event Hubs Configuration",
         "elements": [
           {
-            "name": "namespaceInfo",
-            "type": "Microsoft.Common.InfoBox",
-            "visible": true,
-            "options": {
-              "icon": "Info",
-              "text": "Configure the Event Hub namespace SKU, capacity, and auto-inflate settings. Auto-inflate automatically scales throughput units based on load."
-            }
+            "name": "locations",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Locations",
+            "toolTip": "Select one or more locations to deploy Event Hub Namespaces.",
+            "multiselect": true,
+            "filter": true,
+            "constraints": {
+              "allowedValues": "[map(basics('locationsApi').value, (item) => parse(concat('{\"label\":\"', item.displayName, '\",\"value\":\"', item.name, '\"}')))]",
+              "required": true
+            },
+            "visible": true
           },
           {
-                "name": "locationsApi",
-                "type": "Microsoft.Solutions.ArmApiControl",
-                "request": {
-                  "method": "GET",
-                  "path": "[concat(subscription().id, '/locations?api-version=2022-12-01')]"
+            "name": "configurationSize",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Configuration Size",
+            "toolTip": "Select a preset configuration or choose Custom for manual configuration",
+            "defaultValue": "Medium",
+            "constraints": {
+              "required": true,
+              "allowedValues": [
+                {
+                  "label": "Small (Basic, 1 TU, 2/1 partitions)",
+                  "value": "Small"
+                },
+                {
+                  "label": "Medium (Standard, 5 TU, auto-inflate to 10, 4/1 partitions)",
+                  "value": "Medium"
+                },
+                {
+                  "label": "Large (Standard, 10 TU, auto-inflate to 20, 8/2 partitions)",
+                  "value": "Large"
+                },
+                {
+                  "label": "Custom (Configure manually)",
+                  "value": "Custom"
                 }
-              },
+              ]
+            }
+          },
           {
             "name": "eventHubNamespace",
             "type": "Microsoft.Common.Section",
             "label": "Event Hub Namespace Configuration",
+            "visible": "[equals(steps('eventHubConfig').configurationSize, 'Custom')]",
             "elements": [
-              {
-                "name": "locations",
-                "type": "Microsoft.Common.DropDown",
-                "label": "Locations",
-                "toolTip": "Select one or more locations to deploy Event Hub Namespaces.",
-                "multiselect": true,
-                "filter": true,
-                "constraints": {
-                  "allowedValues": "[map(steps('eventHubConfig').locationsApi.value, (item) => parse(concat('{\"label\":\"', item.displayName, '\",\"value\":\"', item.name, '\"}')))]",
-                  "required": true
-                },
-                "visible": true
-              },
               {
                 "name": "skuName",
                 "type": "Microsoft.Common.DropDown",
@@ -153,8 +174,7 @@
                 "toolTip": "Minimum/baseline throughput units (1-20). This is the starting capacity before auto-inflate.",
                 "constraints": {
                   "required": true
-                },
-                "visible": true
+                }
               },
               {
                 "name": "maximumThroughputUnits",
@@ -167,15 +187,13 @@
                 "toolTip": "Maximum throughput units for auto-inflate scaling (1-40). Must be greater than or equal to baseline throughput units.",
                 "constraints": {
                   "required": true
-                },
-                "visible": "[equals(steps('eventHubConfig').eventHubNamespace.skuName, 'Standard')]"
+                }
               },
               {
                 "name": "zoneRedundant",
                 "type": "Microsoft.Common.CheckBox",
                 "label": "Enable Zone Redundancy",
-                "toolTip": "Requires Standard or Premium SKU. Provides high availability across availability zones.",
-                "visible": "[or(equals(steps('eventHubConfig').eventHubNamespace.skuName, 'Standard'), equals(steps('eventHubConfig').eventHubNamespace.skuName, 'Premium'))]"
+                "toolTip": "Requires Standard or Premium SKU. Provides high availability across availability zones."
               }
             ]
           },
@@ -184,6 +202,7 @@
             "name": "logsEventHub",
             "type": "Microsoft.Common.Section",
             "label": "Logs Event Hub Configuration",
+            "visible": "[equals(steps('eventHubConfig').configurationSize, 'Custom')]",
             "elements": [
               {
                 "name": "partitionCount",
@@ -210,13 +229,13 @@
                   "required": true
                 }
               }
-            ],
-            "visible": true
+            ]
           },
           {
             "name": "eventsEventHub",
             "type": "Microsoft.Common.Section",
             "label": "Events Event Hub Configuration",
+            "visible": "[equals(steps('eventHubConfig').configurationSize, 'Custom')]",
             "elements": [
               {
                 "name": "partitionCount",
@@ -251,8 +270,7 @@
                   "required": true
                 }
               }
-            ],
-            "visible": true
+            ]
           }
         ]
       },
@@ -282,18 +300,18 @@
       }
     ],
     "outputs": {
-      "locations": "[steps('eventHubConfig').eventHubNamespace.locations]",
+      "locations": "[steps('eventHubConfig').locations]",
       "dtTenantId": "[steps('dynatraceConfig').dtTenantId]",
       "dtConfigId": "[steps('dynatraceConfig').dtConfigId]",
       "dtMonitoringServicePrincipalId": "[first(steps('dynatraceConfig').dtServicePrincipal.objectId)]",
-      "skuName": "[steps('eventHubConfig').eventHubNamespace.skuName]",
-      "skuCapacity": "[steps('eventHubConfig').eventHubNamespace.skuCapacity]",
-      "maximumThroughputUnits": "[steps('eventHubConfig').eventHubNamespace.maximumThroughputUnits]",
-      "zoneRedundant": "[steps('eventHubConfig').eventHubNamespace.zoneRedundant]",
-      "evhLogsPartitionCount": "[int(steps('eventHubConfig').logsEventHub.partitionCount)]",
-      "evhLogsRetentionInDays": "[steps('eventHubConfig').logsEventHub.retentionInDays]",
-      "evhEventsPartitionCount": "[int(steps('eventHubConfig').eventsEventHub.partitionCount)]",
-      "evhEventsRetentionInDays": "[steps('eventHubConfig').eventsEventHub.retentionInDays]",
+      "skuName": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventHubNamespace.skuName, if(equals(steps('eventHubConfig').configurationSize, 'Small'), 'Basic', 'Standard'))]",
+      "skuCapacity": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventHubNamespace.skuCapacity, if(equals(steps('eventHubConfig').configurationSize, 'Small'), 1, if(equals(steps('eventHubConfig').configurationSize, 'Medium'), 5, 10)))]",
+      "maximumThroughputUnits": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventHubNamespace.maximumThroughputUnits, if(equals(steps('eventHubConfig').configurationSize, 'Medium'), 10, 20))]",
+      "zoneRedundant": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventHubNamespace.zoneRedundant, false)]",
+      "evhLogsPartitionCount": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), int(steps('eventHubConfig').logsEventHub.partitionCount), if(equals(steps('eventHubConfig').configurationSize, 'Small'), 2, if(equals(steps('eventHubConfig').configurationSize, 'Medium'), 4, 8)))]",
+      "evhLogsRetentionInDays": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').logsEventHub.retentionInDays, 1)]",
+      "evhEventsPartitionCount": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), int(steps('eventHubConfig').eventsEventHub.partitionCount), if(equals(steps('eventHubConfig').configurationSize, 'Large'), 2, 1))]",
+      "evhEventsRetentionInDays": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventsEventHub.retentionInDays, 1)]",
       "tags": "[steps('tags').customTags]"
     }
   }
