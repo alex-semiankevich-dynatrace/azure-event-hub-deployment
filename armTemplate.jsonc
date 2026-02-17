@@ -63,13 +63,6 @@
         "description": "Maximum throughput units for auto-inflate"
       }
     },
-    "zoneRedundant": {
-      "type": "bool",
-      "defaultValue": false,
-      "metadata": {
-        "description": "Enable zone redundancy (Standard or Premium SKU required)"
-      }
-    },
     "evhLogsPartitionCount": {
       "type": "int",
       "defaultValue": 4,
@@ -161,7 +154,6 @@
             "skuCapacity": {"type": "int"},
             "isAutoInflateEnabled": {"type": "bool"},
             "maximumThroughputUnits": {"type": "int"},
-            "zoneRedundant": {"type": "bool"},
             "evhLogsPartitionCount": {"type": "int"},
             "evhEventsPartitionCount": {"type": "int"},
             "evhLogsRetentionInDays": {"type": "int"},
@@ -182,7 +174,7 @@
               "properties": {
                 "isAutoInflateEnabled": "[parameters('isAutoInflateEnabled')]",
                 "maximumThroughputUnits": "[if(parameters('isAutoInflateEnabled'), parameters('maximumThroughputUnits'), null())]",
-                "zoneRedundant": "[parameters('zoneRedundant')]"
+                "zoneRedundant": true
               },
               "tags": "[if(contains(parameters('tags'), 'Microsoft.EventHub/namespaces'), union(parameters('tags')['Microsoft.EventHub/namespaces'], createObject('dt-log-ingest-activated', parameters('dtConfigId'), 'managed-by', 'dynatrace')), union(parameters('tags'), createObject('dt-log-ingest-activated', parameters('dtConfigId'), 'managed-by', 'dynatrace')))]"
             },
@@ -222,7 +214,6 @@
           "skuCapacity": {"value": "[parameters('skuCapacity')]"},
           "isAutoInflateEnabled": {"value": "[variables('isAutoInflateEnabled')]"},
           "maximumThroughputUnits": {"value": "[parameters('maximumThroughputUnits')]"},
-          "zoneRedundant": {"value": "[parameters('zoneRedundant')]"},
           "evhLogsPartitionCount": {"value": "[parameters('evhLogsPartitionCount')]"},
           "evhEventsPartitionCount": {"value": "[parameters('evhEventsPartitionCount')]"},
           "evhLogsRetentionInDays": {"value": "[parameters('evhLogsRetentionInDays')]"},

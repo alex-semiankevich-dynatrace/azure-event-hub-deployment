@@ -115,6 +115,10 @@
               "required": true,
               "allowedValues": [
                 {
+                  "label": "Dev/Test (Basic, 1 TU, 1/1 partitions)",
+                  "value": "DevTest"
+                },
+                {
                   "label": "Small (Basic, 1 TU, 2/1 partitions)",
                   "value": "Small"
                 },
@@ -188,12 +192,6 @@
                 "constraints": {
                   "required": true
                 }
-              },
-              {
-                "name": "zoneRedundant",
-                "type": "Microsoft.Common.CheckBox",
-                "label": "Enable Zone Redundancy",
-                "toolTip": "Requires Standard or Premium SKU. Provides high availability across availability zones."
               }
             ]
           },
@@ -304,11 +302,10 @@
       "dtTenantId": "[steps('dynatraceConfig').dtTenantId]",
       "dtConfigId": "[steps('dynatraceConfig').dtConfigId]",
       "dtMonitoringServicePrincipalId": "[first(steps('dynatraceConfig').dtServicePrincipal.objectId)]",
-      "skuName": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventHubNamespace.skuName, if(equals(steps('eventHubConfig').configurationSize, 'Small'), 'Basic', 'Standard'))]",
-      "skuCapacity": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventHubNamespace.skuCapacity, if(equals(steps('eventHubConfig').configurationSize, 'Small'), 1, if(equals(steps('eventHubConfig').configurationSize, 'Medium'), 5, 10)))]",
+      "skuName": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventHubNamespace.skuName, if(or(equals(steps('eventHubConfig').configurationSize, 'DevTest'), equals(steps('eventHubConfig').configurationSize, 'Small')), 'Basic', 'Standard'))]",
+      "skuCapacity": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventHubNamespace.skuCapacity, if(or(equals(steps('eventHubConfig').configurationSize, 'DevTest'), equals(steps('eventHubConfig').configurationSize, 'Small')), 1, if(equals(steps('eventHubConfig').configurationSize, 'Medium'), 5, 10)))]",
       "maximumThroughputUnits": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventHubNamespace.maximumThroughputUnits, if(equals(steps('eventHubConfig').configurationSize, 'Medium'), 10, 20))]",
-      "zoneRedundant": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventHubNamespace.zoneRedundant, false)]",
-      "evhLogsPartitionCount": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), int(steps('eventHubConfig').logsEventHub.partitionCount), if(equals(steps('eventHubConfig').configurationSize, 'Small'), 2, if(equals(steps('eventHubConfig').configurationSize, 'Medium'), 4, 8)))]",
+      "evhLogsPartitionCount": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), int(steps('eventHubConfig').logsEventHub.partitionCount), if(equals(steps('eventHubConfig').configurationSize, 'DevTest'), 1, if(equals(steps('eventHubConfig').configurationSize, 'Small'), 2, if(equals(steps('eventHubConfig').configurationSize, 'Medium'), 4, 8))))]",
       "evhLogsRetentionInDays": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').logsEventHub.retentionInDays, 1)]",
       "evhEventsPartitionCount": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), int(steps('eventHubConfig').eventsEventHub.partitionCount), if(equals(steps('eventHubConfig').configurationSize, 'Large'), 2, 1))]",
       "evhEventsRetentionInDays": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventsEventHub.retentionInDays, 1)]",
