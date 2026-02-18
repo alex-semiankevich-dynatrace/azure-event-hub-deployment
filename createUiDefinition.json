@@ -317,7 +317,6 @@
             "type": "Microsoft.Common.TagsByResource",
             "toolTip": "Add custom tags to resources",
             "resources": [
-              "Microsoft.EventHub/namespaces",
               "Microsoft.Resources/resourceGroups"
             ]
           }
