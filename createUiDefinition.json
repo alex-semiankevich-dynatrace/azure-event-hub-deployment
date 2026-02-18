@@ -110,7 +110,7 @@
             "filter": true,
             "defaultValue": "parse('[]')",
             "constraints": {
-              "allowedValues": "[map(basics('locationsApi').value, (item) => parse(concat('{\"label\":\"', item.displayName, '\",\"value\":\"', item.name, '\"}')))]",
+              "allowedValues": "[map(filter(basics('locationsApi').value, (item) => equals(item.metadata.regionType, 'Physical')), (item) => parse(concat('{\"label\":\"', item.displayName, '\",\"value\":\"', item.name, '\"}')))]",
               "required": true
             },
             "visible": true
