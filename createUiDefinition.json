@@ -337,6 +337,10 @@
       "evhEventsPartitionCount": "[coalesce(first(map(filter(parse('[{\"config\":\"DevTest\",\"partitions\":1},{\"config\":\"Small\",\"partitions\":1},{\"config\":\"Medium\",\"partitions\":1},{\"config\":\"Large\",\"partitions\":2}]'), (item) => equals(item.config, steps('eventHubConfig').configurationSize)), (item) => item.partitions)), int(steps('eventHubConfig').eventsEventHub.partitionCount))]",
       "evhEventsRetentionInDays": "[if(equals(steps('eventHubConfig').configurationSize, 'Custom'), steps('eventHubConfig').eventsEventHub.retentionInDays, 1)]",
       "tags": "[steps('tags').customTags]"
-    }
+    },
+    "resourceTypes": [
+      "Microsoft.EventHub/namespaces",
+      "Microsoft.Resources/resourceGroups"
+    ]
   }
 }
