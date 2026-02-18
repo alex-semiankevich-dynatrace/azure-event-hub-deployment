@@ -1,8 +1,12 @@
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Falex-semiankevich-dynatrace%2Fazure-event-hub-deployment%2Fmaster%2FarmTemplate.jsonc/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Falex-semiankevich-dynatrace%2Fazure-event-hub-deployment%2Fmaster%2FcreateUiDefinition.jsonc)
-
 # Azure Event Hub Deployment for Dynatrace
 
 Subscription-level ARM template with an Azure Portal UI definition for deploying Event Hub namespaces across multiple Azure locations. Designed for Dynatrace log and event ingestion with standardized configuration, CAF-compliant naming, and RBAC assignments for the Dynatrace monitoring service principal.
+
+## Prerequisites
+
+- An active Azure subscription with permissions to create resource groups and role assignments
+- A registered Dynatrace monitoring service principal (Object ID required)
+- `Microsoft.EventHub` and `Microsoft.Authorization` resource providers registered on the subscription
 
 ## Repository Structure
 
@@ -25,7 +29,9 @@ All namespaces are tagged with `dt-log-ingest-activated: {dtConfigId}` and `mana
 
 ## Portal Deployment
 
-Click the **Deploy to Azure** button at the top of this page. The UI definition guides you through three steps:
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Falex-semiankevich-dynatrace%2Fazure-event-hub-deployment%2Fmaster%2FarmTemplate.jsonc/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Falex-semiankevich-dynatrace%2Fazure-event-hub-deployment%2Fmaster%2FcreateUiDefinition.jsonc)
+
+The UI definition guides you through three steps:
 
 1. **Dynatrace Configuration** — Environment ID, Monitoring Configuration ID, and Service Principal selection
 2. **Event Hubs Configuration** — Location selection and configuration size preset (or custom)
