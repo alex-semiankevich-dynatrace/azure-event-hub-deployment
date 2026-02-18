@@ -96,7 +96,7 @@
               "name": "(New) default App Id"
             },
             "constraints": {
-              "required": false
+              "required": false // make "Sekret Key" optional for existing Service Principals, since only SP Object ID is required for role assignment.
             },
             "options": {
               "hideCertificate": true
