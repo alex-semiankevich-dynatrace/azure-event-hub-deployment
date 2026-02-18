@@ -96,7 +96,7 @@
               "name": "(New) default App Id"
             },
             "constraints": {
-              "required": true
+              "required": false
             },
             "options": {
               "hideCertificate": true
