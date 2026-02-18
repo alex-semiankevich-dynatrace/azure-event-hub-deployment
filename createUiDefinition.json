@@ -108,6 +108,7 @@
             "toolTip": "Select one or more locations to deploy Event Hub Namespaces.",
             "multiselect": true,
             "filter": true,
+            "defaultValue": "parse('[]')",
             "constraints": {
               "allowedValues": "[map(basics('locationsApi').value, (item) => parse(concat('{\"label\":\"', item.displayName, '\",\"value\":\"', item.name, '\"}')))]",
               "required": true
@@ -307,7 +308,7 @@
         ]
       }
     ],
-    "outputs": {
+    "outputs": { 
       "locations": "[steps('eventHubConfig').locations]",
       "dtTenantId": "[steps('dynatraceConfig').dtTenantId]",
       "dtConfigId": "[steps('dynatraceConfig').dtConfigId]",
