@@ -1,137 +1,110 @@
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Falex-semiankevich-dynatrace%2Fazure-event-hub-deployment%2Fmaster%2FarmTemplate.jsonc/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Falex-semiankevich-dynatrace%2Fazure-event-hub-deployment%2Fmaster%2FcreateUiDefinition.jsonc)
 
-# Create ARM template and UI Definition for Event Hub deployment
+# Azure Event Hub Deployment for Dynatrace
 
-## Description
+Subscription-level ARM template with an Azure Portal UI definition for deploying Event Hub namespaces across multiple Azure locations. Designed for Dynatrace log and event ingestion with standardized configuration, CAF-compliant naming, and RBAC assignments for the Dynatrace monitoring service principal.
 
-Deploy Event Hub namespaces across multiple Azure locations with resource groups, standardized config for Dynatrace log/event ingestion, and proper RBAC assignments for the Dynatrace monitoring service principal. Follow Azure CAF and WAF naming conventions for the resources we provision.
+## Repository Structure
 
-Provide a UI definition with the ARM template, see: https://github.com/dynatrace-oss/cloud-snippets/tree/main/azure/azure-activation-templates
+| File | Description |
+|------|-------------|
+| `armTemplate.jsonc` | ARM template (subscription-level) that deploys resource groups, Event Hub namespaces, Event Hubs, and RBAC role assignments |
+| `createUiDefinition.jsonc` | Azure Portal UI definition providing a guided wizard for configuring the deployment |
 
-## Open Questions
+## What Gets Deployed
 
-- Do we have the dtMonitoringServicePrincipalId (object id), or only the app id / client id? For role assignment, we need object id.
-  ```bash
-  # Get the Service Principal Object ID from the App ID
-  az ad sp show --id <app-id> --query id -o tsv
-  ```
+For each selected Azure location, the template creates:
 
-## Acceptance Criteria
+1. **Resource Group** — `rg-dt-{dtTenantId}-{location}`
+2. **Event Hub Namespace** — `evhns-dt-{dtTenantId}-{location}` with auto-inflate (Standard SKU) and zone redundancy
+3. **Event Hub for logs** — `dt-logs-evh` (configurable partition count, default: 4)
+4. **Event Hub for events** — `dt-events-evh` (1 or 2 partitions, default: 1)
+5. **RBAC Role Assignment** — [Azure Event Hubs Data Receiver](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/analytics#azure-event-hubs-data-receiver) role assigned to the Dynatrace service principal at resource group scope
 
-### ✅ Support of Subscription and Management Group scope
+All namespaces are tagged with `dt-log-ingest-activated: {dtConfigId}` and `managed-by: dynatrace` for autodiscovery.
 
-- For the Management Group scope, a subscription needs to be selected.
+## Portal Deployment
 
-### ✅ Resource Group Creation
+Click the **Deploy to Azure** button at the top of this page. The UI definition guides you through three steps:
 
-- Create a resource group in each specified location
-- Naming convention: rg-dt-{dtTenantId}-{location}
-- Example: rg-dt-abc12345-eastus, rg-dt-abc12345-westeurope
-- Resource groups must be created before namespaces
+1. **Dynatrace Configuration** — Environment ID, Monitoring Configuration ID, and Service Principal selection
+2. **Event Hubs Configuration** — Location selection and configuration size preset (or custom)
+3. **Tags** — Optional custom tags per resource type
 
-### ✅ Namespace Deployment
+### Configuration Size Presets
 
-- Create Event Hub namespace in each location's resource group
-- Naming convention: evhns-dt-{dtTenantId}-{location}
-- Example: evhns-dt-abc12345-eastus, evhns-dt-abc12345-westeurope
-- Tag each namespace with `dt-log-ingest-activated: {monitoring-config-id}`
-- Configure auto-inflate with configurable max throughput units
-- Support additional optional tags?:
-  - environment (e.g., prod, dev, test)
-  - owner or managed-by
-  - cost-center (optional)
+| Preset | SKU | Baseline TU | Max TU (Auto-inflate) | Log Partitions | Event Partitions |
+|--------|-----|-------------|----------------------|----------------|-----------------|
+| Dev/Test | Basic | 1 | — | 1 | 1 |
+| Small | Standard | 1 | 2 | 2 | 1 |
+| Medium | Standard | 1 | 4 | 4 | 1 |
+| Large | Standard | 1 | 16 | 16 | 2 |
+| Custom | Configurable | Configurable | Configurable | Configurable | Configurable |
 
-### ✅ Event Hubs per Namespace
+## CLI Deployment
 
-**dt-logs-evh:**
-
-- Naming convention: dt-logs-evh
-- Default: 4 partitions
-- Configurable via parameter (1-32)
-
-**dt-events-evh:**
-
-- Naming convention: dt-events-evh
-- Default: 1 partition
-- Parameter validation to allow only 1 or 2
-
-### ✅ RBAC Assignment
-
-- Assign the "Azure Event Hubs Data Receiver" role to the Dynatrace monitoring service principal
-- Scope: Resource group level (covers all Event Hubs in the RG)
-- Service principal must be provided as a parameter (object ID)
-- Role assignment must depend on resource group creation
-- Follow the principle of least privilege (read-only access)
-
-### ✅ Template Parameters
-
-```
-- locations (array) - List of Azure locations
-- dtTenantId (string) - Dynatrace tenant ID for naming
-- dtConfigId (string) - Monitoring ID for tagging and autodiscovery
-- environment (string) - Environment identifier (prod/dev/test, default: prod)
-- dtMonitoringServicePrincipalId (string) - Service principal object ID
-- dtLogsPartitionCount (int, default: 8)
-- dtEventsPartitionCount (int, 1 or 2, default: 2)
-- skuName (Basic/Standard/Premium, default: Standard) - Unclear if we should support Basic
-- skuCapacity (int, 1-20, default: 1) - This is the minimum/baseline TUs
-- maximumThroughputUnits (int, default: 10) - This is the maximum TUs autoinflate can scale up to
-- messageRetentionInDays (int, 1-7, default: 1)
-- zoneRedundant (bool, default: false) - Can be activated for Standard or Premium SKUs
-- tags (object, optional) - Additional custom tags
-```
-
-### ✅ Template Outputs
-
-- **ONLY** return an array of deployed namespace names (no sensitive data like connectionStrings).
-- Format: ["evhns-dt-abc12345-eastus", "evhns-dt-abc12345-westeurope", ...]
-
-## Technical Notes
-
-### Role Definition
-
-- Built-in role: [Azure Event Hubs Data Receiver](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/analytics#azure-event-hubs-data-receiver)
-- Role ID: a638d3c7-ab3a-418d-83e6-5f17a39d4fde
-- Scope: /subscriptions/{subscriptionId}/resourceGroups/rg-dt-{dtTenantId}-{location}
-
-### Deployment Structure
-
-This requires a **subscription-level deployment** since resource groups are being created.
-
-Template type: Microsoft.Resources/deployments at subscription scope
-
-### Sample Deployment
+Since the template creates resource groups, it requires a **subscription-level deployment**:
 
 ```bash
-# Production deployment
+# Default configuration
 az deployment sub create \
   --location eastus \
-  --template-file template.json \
-  --parameters dtTenantId=gmg80500 \
+  --template-file armTemplate.jsonc \
+  --parameters dtTenantId=abc12345 \
                dtConfigId="cfc78e0e-a116-3289-bba1-ac6ad7e81c1f" \
                locations='["eastus","westeurope"]' \
-               dtMonitoringServicePrincipalId="<service-principal-object-id>" 
+               dtMonitoringServicePrincipalId="<service-principal-object-id>"
 
 # Custom configuration
 az deployment sub create \
   --location eastus \
-  --template-file template.json \
-  --parameters dtTenantId=gmg80500 \
+  --template-file armTemplate.jsonc \
+  --parameters dtTenantId=abc12345 \
                dtConfigId="cfc78e0e-a116-3289-bba1-ac6ad7e81c1f" \
                locations='["eastus","westus","westeurope"]' \
                dtMonitoringServicePrincipalId="<service-principal-object-id>" \
-               dtLogsPartitionCount=8 \
-               dtEventsPartitionCount=2 \
+               skuName=Standard \
+               skuCapacity=2 \
                maximumThroughputUnits=20 \
+               evhLogsPartitionCount=8 \
+               evhEventsPartitionCount=2
 ```
 
-## Naming Convention (CAF Compliant)
+> **Note:** The `dtMonitoringServicePrincipalId` parameter requires the service principal **Object ID** (not the App/Client ID). You can retrieve it with:
+> ```bash
+> az ad sp show --id <app-id> --query id -o tsv
+> ```
 
-Following Azure Cloud Adoption Framework naming conventions:
+## Parameters
 
-| Resource Type       | Abbreviation | Format                           | Example                  |
-|---------------------|--------------|----------------------------------|--------------------------|
-| Resource Group      | rg           | rg-dt-{dtTenantId}-{location}    | rg-dt-abc12345-eastus    |
-| Event Hub Namespace | evhns        | evhns-dt-{dtTenantId}-{location} | evhns-dt-abc12345-eastus |
-| Event Hub (logs)    | evh          | dt-logs-evh                      | dt-logs-evh              |
-| Event Hub (events)  | evh          | dt-events-evh                    | dt-events-evh            |
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `locations` | array | *(required)* | Azure locations for Event Hub namespace deployment |
+| `dtTenantId` | string | *(required)* | Dynatrace tenant ID used in resource naming |
+| `dtConfigId` | string | *(required)* | Monitoring configuration ID for tagging and autodiscovery |
+| `dtMonitoringServicePrincipalId` | string | *(required)* | Service principal Object ID for RBAC assignment |
+| `skuName` | string | `Standard` | Namespace SKU: Basic, Standard, or Premium |
+| `skuCapacity` | int | `1` | Baseline throughput units (1–20) |
+| `maximumThroughputUnits` | int | `10` | Max throughput units for auto-inflate (1–40, Standard SKU only) |
+| `evhLogsPartitionCount` | int | `4` | Partition count for `dt-logs-evh` (1–32) |
+| `evhLogsRetentionInDays` | int | `1` | Message retention in days for `dt-logs-evh` (1–7) |
+| `evhEventsPartitionCount` | int | `1` | Partition count for `dt-events-evh` (1 or 2) |
+| `evhEventsRetentionInDays` | int | `1` | Message retention in days for `dt-events-evh` (1–7) |
+| `tags` | object | `{}` | Additional custom tags (supports per-resource-type tags) |
+
+## Outputs
+
+| Output | Type | Description |
+|--------|------|-------------|
+| `deployedNamespaces` | array | Names of deployed Event Hub namespaces, e.g. `["evhns-dt-abc12345-eastus", "evhns-dt-abc12345-westeurope"]` |
+
+## Naming Conventions
+
+Following [Azure Cloud Adoption Framework](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming) naming conventions:
+
+| Resource | Format | Example |
+|----------|--------|---------|
+| Resource Group | `rg-dt-{dtTenantId}-{location}` | `rg-dt-abc12345-eastus` |
+| Event Hub Namespace | `evhns-dt-{dtTenantId}-{location}` | `evhns-dt-abc12345-eastus` |
+| Event Hub (logs) | `dt-logs-evh` | `dt-logs-evh` |
+| Event Hub (events) | `dt-events-evh` | `dt-events-evh` |
