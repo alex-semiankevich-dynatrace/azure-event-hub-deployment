@@ -20,7 +20,7 @@ Subscription-level ARM template with an Azure Portal UI definition for deploying
 For each selected Azure location, the template creates:
 
 1. **Resource Group** — `rg-dt-{dtTenantId}-{location}`
-2. **Event Hub Namespace** — `evhns-dt-{dtTenantId}-{location}` with auto-inflate (Standard SKU) and zone redundancy
+2. **Event Hub Namespace** — `evhns-dt-{dtTenantId}-{location}` with auto-inflate (Standard SKU) and zone redundancy (if available)
 3. **Event Hub for logs** — `dt-logs-evh` (configurable partition count, default: 4)
 4. **Event Hub for events** — `dt-events-evh` (1 or 2 partitions, default: 1)
 5. **RBAC Role Assignment** — [Azure Event Hubs Data Receiver](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/analytics#azure-event-hubs-data-receiver) role assigned to the Dynatrace service principal at resource group scope
