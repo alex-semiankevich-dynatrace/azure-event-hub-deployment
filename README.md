@@ -13,7 +13,7 @@ Subscription-level ARM template with an Azure Portal UI definition for deploying
 | File | Description |
 |------|-------------|
 | `armTemplate.jsonc` | ARM template (subscription-level) that deploys resource groups, Event Hub namespaces, Event Hubs, and RBAC role assignments |
-| `createUiDefinition.jsonc` | Azure Portal UI definition providing a guided wizard for configuring the deployment |
+| `createUiDefinition.json` | Azure Portal UI definition providing a guided wizard for configuring the deployment |
 
 ## What Gets Deployed
 
@@ -29,7 +29,7 @@ All namespaces are tagged with `dt-log-ingest-activated: {dtConfigId}` and `mana
 
 ## Portal Deployment
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Falex-semiankevich-dynatrace%2Fazure-event-hub-deployment%2Fmaster%2FarmTemplate.jsonc/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Falex-semiankevich-dynatrace%2Fazure-event-hub-deployment%2Fmaster%2FcreateUiDefinition.jsonc)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Falex-semiankevich-dynatrace%2Fazure-event-hub-deployment%2Fmaster%2FarmTemplate.jsonc/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Falex-semiankevich-dynatrace%2Fazure-event-hub-deployment%2Fmaster%2FcreateUiDefinition.json)
 
 The UI definition guides you through three steps:
 
