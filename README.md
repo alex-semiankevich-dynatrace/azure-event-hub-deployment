@@ -70,10 +70,11 @@ az deployment sub create \
                locations='["eastus","westus","westeurope"]' \
                dtMonitoringServicePrincipalId="<service-principal-object-id>" \
                skuName=Standard \
-               skuCapacity=2 \
-               maximumThroughputUnits=20 \
-               evhLogsPartitionCount=8 \
-               evhEventsPartitionCount=2
+               skuCapacity=1 \
+               maximumThroughputUnits=2 \
+               evhLogsPartitionCount=2 \
+               evhEventsPartitionCount=1 \
+               tags='{"cost-center": "platform-team", "environment": "production"}'
 ```
 
 > **Note:** The `dtMonitoringServicePrincipalId` parameter requires the service principal **Object ID** (not the App/Client ID). You can retrieve it with:
