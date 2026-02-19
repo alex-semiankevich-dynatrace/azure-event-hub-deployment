@@ -84,6 +84,15 @@
             }
           },
           {
+            "name": "dtServicePrincipalNote",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": true,
+            "options": {
+              "icon": "Info",
+              "text": "Make sure to select the same service principal you used during onboarding in Dynatrace. Not sure which one it was? No worries — you can look it up using Service Principal ID displayed in the Dynatrace onboarding wizard."
+            }
+          },
+          {
             "name": "dtServicePrincipal",
             "type": "Microsoft.Common.ServicePrincipalSelector",
             "label": {
@@ -136,28 +145,28 @@
             "type": "Microsoft.Common.DropDown",
             "label": "Configuration Size",
             "toolTip": "Select a preset configuration or choose Custom for manual configuration",
-            "defaultValue": "Small (Standard, 1 TU, auto-inflate to 2, 2/1 partitions)",
+            "defaultValue": "Small (Max Throughput: 14.4 GB/hour)",
             "constraints": {
               "required": true,
               "allowedValues": [
                 {
-                  "label": "Dev/Test (Basic, 1 TU, 1/1 partitions)",
+                  "label": "Dev/Test (Max Throughput: 7.2 GB/hour)",
                   "value": "DevTest"
                 },
                 {
-                  "label": "Small (Standard, 1 TU, auto-inflate to 2, 2/1 partitions)",
+                  "label": "Small (Max Throughput: 14.4 GB/hour)",
                   "value": "Small"
                 },
                 {
-                  "label": "Medium (Standard, 1 TU, auto-inflate to 4, 4/1 partitions)",
+                  "label": "Medium (Max Throughput: 57.6 GB/hour)",
                   "value": "Medium"
                 },
                 {
-                  "label": "Large (Standard, 1 TU, auto-inflate to 16, 16/2 partitions)",
+                  "label": "Large (Max Throughput: 115.2 GB/hour)",
                   "value": "Large"
                 },
                 {
-                  "label": "Custom (Configure manually)",
+                  "label": "Custom",
                   "value": "Custom"
                 }
               ]

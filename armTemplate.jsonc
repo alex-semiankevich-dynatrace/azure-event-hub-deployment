@@ -1,13 +1,6 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "metadata": {
-    "_generator": {
-      "name": "bicep",
-      "version": "0.4.1.14562",
-      "templateHash": "1234567890"
-    }
-  },
   "parameters": {
     "locations": {
       "type": "array",
@@ -30,7 +23,7 @@
     "dtMonitoringServicePrincipalId": {
       "type": "string",
       "metadata": {
-        "description": "Service principal Object ID or Application ID for RBAC assignment."
+        "description": "Service principal Object ID for RBAC assignment."
       }
     },
     "skuName": {
@@ -173,8 +166,7 @@
               },
               "properties": {
                 "isAutoInflateEnabled": "[parameters('isAutoInflateEnabled')]",
-                "maximumThroughputUnits": "[if(parameters('isAutoInflateEnabled'), parameters('maximumThroughputUnits'), null())]",
-                "zoneRedundant": true
+                "maximumThroughputUnits": "[if(parameters('isAutoInflateEnabled'), parameters('maximumThroughputUnits'), null())]"
               },
               "tags": "[if(contains(parameters('tags'), 'Microsoft.EventHub/namespaces'), union(parameters('tags')['Microsoft.EventHub/namespaces'], createObject('dt-log-ingest-activated', parameters('dtConfigId'), 'managed-by', 'dynatrace')), union(parameters('tags'), createObject('dt-log-ingest-activated', parameters('dtConfigId'), 'managed-by', 'dynatrace')))]"
             },
