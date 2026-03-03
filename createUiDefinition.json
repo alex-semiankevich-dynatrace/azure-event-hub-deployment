@@ -67,7 +67,6 @@
             "name": "dtTenantId",
             "type": "Microsoft.Common.TextBox",
             "label": "Dynatrace Environment ID",
-            "defaultValue": "[urlParameters('dtTenantId')]",
             "toolTip": "Your Dynatrace environment identifier (e.g. abc1234d)",
             "constraints": {
               "required": true
