@@ -89,13 +89,13 @@
             "visible": true,
             "options": {
               "icon": "Info",
-              "text": "Enter the Object ID of the service principal you used during onboarding in Dynatrace. You can find it in the Dynatrace onboarding wizard under Service Principal ID."
+              "text": "Enter the Object ID of the service principal you used during onboarding in Dynatrace. You can find it in the Dynatrace onboarding wizard under Principal (object) ID."
             }
           },
           {
             "name": "dtServicePrincipal",
             "type": "Microsoft.Common.TextBox",
-            "label": "Service Principal Object ID",
+            "label": "Service Principal (object) ID\n",
             "toolTip": "The Object ID (not Application/Client ID) of the Dynatrace service principal (UUID format)",
             "constraints": {
               "required": true,
