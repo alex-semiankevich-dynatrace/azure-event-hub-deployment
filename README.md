@@ -12,7 +12,7 @@ Subscription-level ARM template with an Azure Portal UI definition for deploying
 
 | File | Description |
 |------|-------------|
-| `mainTemplate.json` | ARM template (subscription-level) that deploys resource groups, Event Hub namespaces, Event Hubs, and RBAC role assignments |
+| `mainTemplate3.json` | ARM template (subscription-level) that deploys resource groups, Event Hub namespaces, Event Hubs, and RBAC role assignments |
 | `createUiDefinition.json` | Azure Portal UI definition providing a guided wizard for configuring the deployment |
 
 ## What Gets Deployed
@@ -29,7 +29,7 @@ All namespaces are tagged with `dt-log-ingest-activated: {dtConfigId}` and `mana
 
 ## Portal Deployment
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Falex-semiankevich-dynatrace%2Fazure-event-hub-deployment%2Fmaster%2FmainTemplate2.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Falex-semiankevich-dynatrace%2Fazure-event-hub-deployment%2Fmaster%2FcreateUiDefinition.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Falex-semiankevich-dynatrace%2Fazure-event-hub-deployment%2Fmaster%2FmainTemplate3.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Falex-semiankevich-dynatrace%2Fazure-event-hub-deployment%2Fmaster%2FcreateUiDefinition.json)
 
 The UI definition guides you through three steps:
 
@@ -55,7 +55,7 @@ Since the template creates resource groups, it requires a **subscription-level d
 # Default configuration
 az deployment sub create \
   --location eastus \
-  --template-file mainTemplate2.json \
+  --template-file mainTemplate3.json \
   --parameters dtTenantId=abc12345 \
                dtConfigId="cfc78e0e-a116-3289-bba1-ac6ad7e81c1f" \
                locations='["eastus","westeurope"]' \
@@ -64,7 +64,7 @@ az deployment sub create \
 # Custom configuration
 az deployment sub create \
   --location eastus \
-  --template-file mainTemplate2.json \
+  --template-file mainTemplate3.json \
   --parameters dtTenantId=abc12345 \
                dtConfigId="cfc78e0e-a116-3289-bba1-ac6ad7e81c1f" \
                locations='["eastus","westus","westeurope"]' \
