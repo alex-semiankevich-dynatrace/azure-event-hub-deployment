@@ -101,10 +101,7 @@
     }
   },
   "variables": {
-    // "Azure Event Hubs Data Receiver" role
-    // Role Description: https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/analytics#azure-event-hubs-data-receiver
     "dataReceiverRoleId": "a638d3c7-ab3a-418d-83e6-5f17a39d4fde",
-    // Auto-inflate is only supported for Standard SKU
     "isAutoInflateEnabled": "[equals(parameters('skuName'), 'Standard')]"
   },
   "resources": [
@@ -112,7 +109,6 @@
       "apiVersion": "2020-06-01",
       "name": "pid-d5da5f8a-9ca4-4ed4-853b-b703f95af008",
       "type": "Microsoft.Resources/deployments",
-      "location": "[deployment().location]",
       "properties": {
         "mode": "Incremental",
         "template": {
@@ -195,7 +191,6 @@
                 "messageRetentionInDays": "[parameters('evhLogsRetentionInDays')]",
                 "partitionCount": "[parameters('evhLogsPartitionCount')]"
               }
-              // Note: Tags cannot be applied to Event Hubs.
             },
             {
               "type": "Microsoft.EventHub/namespaces/eventhubs",
@@ -208,7 +203,6 @@
                 "messageRetentionInDays": "[parameters('evhEventsRetentionInDays')]",
                 "partitionCount": "[parameters('evhEventsPartitionCount')]"
               }
-              // Note: Tags cannot be applied to Event Hubs.
             }
           ]
         },
