@@ -101,9 +101,9 @@
     },
     "evhnsSuffix": {
       "type": "string",
-      "defaultValue": "[substring(guid(), 0, 4)]",
+      "defaultValue": "[substring(guid(utcNow()), 0, 4)]",
       "metadata": {
-        "description": "Unique suffix appended to the Event Hub namespace name (e.g. 'a1b2' → evhns-dt-<tenant>-<location>-a1b2). Auto-generated from the first 4 chars of a UUID by default; override to target an existing namespace."
+        "description": "Unique suffix appended to the Event Hub namespace name (e.g. 'a1b2' → evhns-dt-<tenant>-<location>-a1b2). Auto-generated from the current UTC timestamp via guid() — unique per deployment run, so each deployment creates a new namespace. Override with a fixed value to target an existing namespace and make re-deployments idempotent."
       }
     }
   },
