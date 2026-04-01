@@ -103,7 +103,7 @@
       "type": "string",
       "defaultValue": "[substring(guid(utcNow()), 0, 4)]",
       "metadata": {
-        "description": "Unique suffix appended to the Event Hub namespace name (e.g. 'a1b2' → evhns-dt-<tenant>-<location>-a1b2). Auto-generated from the current UTC timestamp via guid() — unique per deployment run, so each deployment creates a new namespace. Override with a fixed value to target an existing namespace and make re-deployments idempotent."
+        "description": "Optional suffix appended to the Event Hub Namespace name (e.g. 'a1b2' → evhns-dt-<tenant>-<location>-a1b2). If not specified, a random 4-character value is generated. Pass a fixed value to target an existing namespace on re-deployment; pass \"\" to omit the suffix entirely."
       }
     }
   },
