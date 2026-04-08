@@ -208,6 +208,14 @@
               // Note: Tags cannot be applied to Event Hubs.
             },
             {
+              "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
+              "apiVersion": "2021-11-01",
+              "name": "[format('{0}/dt-logs-evh/dynatrace', variables('evhnsName'))]",
+              "dependsOn": [
+                "[resourceId('Microsoft.EventHub/namespaces/eventhubs', variables('evhnsName'), 'dt-logs-evh')]"
+              ]
+            },
+            {
               "type": "Microsoft.EventHub/namespaces/eventhubs",
               "apiVersion": "2021-11-01",
               "name": "[format('{0}/dt-events-evh', variables('evhnsName'))]",
@@ -219,6 +227,14 @@
                 "partitionCount": "[parameters('evhEventsPartitionCount')]"
               }
               // Note: Tags cannot be applied to Event Hubs.
+            },
+            {
+              "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
+              "apiVersion": "2021-11-01",
+              "name": "[format('{0}/dt-events-evh/dynatrace', variables('evhnsName'))]",
+              "dependsOn": [
+                "[resourceId('Microsoft.EventHub/namespaces/eventhubs', variables('evhnsName'), 'dt-events-evh')]"
+              ]
             }
           ]
         },
